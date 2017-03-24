@@ -1,0 +1,15 @@
+---
+- name: some basic setting
+  hosts: zabbix-server
+  remote_user: root
+  become: yes
+  become_method: sudo
+  
+  vars_files:
+  - vars_files/all
+  
+  roles:
+     - common
+     - apache
+     - php
+     - mysql
