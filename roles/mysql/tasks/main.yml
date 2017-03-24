@@ -1,5 +1,5 @@
 ---
-- name: install mysql etc
+- name: install mysql etc(centos6)
   yum: name={{ item }} state=present
   with_items:
     - mysql
@@ -9,11 +9,25 @@
   ignore_errors: yes  
   when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
 
+- name: install mysql etc(centos7)
+  yum: name={{ item }} state=installed
+  with_items:
+   - mariadb-server
+   - MySQL-python
+  ignore_errors: yes  
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+
 - name: insert iptables rule
   lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ mysql_port }}"
               insertafter="^:OUTPUT " line="-A INPUT -p tcp  --dport {{ mysql_port }} -j  ACCEPT"
   notify: restart iptables
-
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
+  
+- name: insert firewalld rule
+  firewalld: port={{ mysql_port }}/tcp permanent=true state=enabled immediate=yes
+  notify: restart iptables
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
+  
 - name: configure selinux to mysql on  any mysql_port
   seboolean: name={{ item }} state=true persistent=yes
   with_items:
@@ -28,6 +42,12 @@
 - name: start mysql service and permanent
   service: name=mysqld state=restarted enabled=yes
   ignore_errors: yes
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
+
+- name: Start MariaDB Service
+  service: name=mariadb state=started enabled=yes
+  ignore_errors: yes
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
 
 - name: create mysql user
   mysql_user: name={{ dbuser }} host={{ item }} password={{ dbpassword }} priv="*.*:ALL,GRANT" state=present  

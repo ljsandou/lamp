@@ -1,6 +1,6 @@
 ---
 - name: some basic setting
-  hosts: zabbix-server
+  hosts: centos7
   remote_user: root
   become: yes
   become_method: sudo

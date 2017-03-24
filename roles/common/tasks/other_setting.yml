@@ -4,4 +4,5 @@
   with_items:
     - libselinux-python
     - libsemanage-python
+    - firewalld
   ignore_errors: yes

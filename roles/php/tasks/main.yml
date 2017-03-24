@@ -8,6 +8,15 @@
    - php-fpm 
   when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
 
+- name: Install php etc - Centos7
+  yum: name={{ item }} state=present
+  with_items:
+   - php
+   - php-mysql
+   - git
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+
+
 - name: start php-fpm permantent
   service: name=php-fpm state=restarted enabled=yes
   ignore_errors: yes
@@ -15,4 +24,3 @@
 
 - name: copy php file to test if it's installed
   template: src=index.php.j2 dest=/var/www/html/test.php
-  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"

@@ -12,6 +12,9 @@
   notify: restart apache
   when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
 
+- name: start firewalld
+  service: name=firewalld state=started enabled=yes
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
 
 - name: add rule to iptables
   lineinfile: dest=/etc/sysconfig/iptables create=yes state=present regexp="{{ apache_port }}" insertafter="^:OUTPUT "
@@ -20,8 +23,7 @@
   when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
 
 
-
-- name: instert firewalld rule for nginx
+- name: instert firewalld rule for apache
   firewalld: port={{ apache_port }}/tcp  permanent=true state=enabled immediate=yes
   ignore_errors: yes  
   when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
