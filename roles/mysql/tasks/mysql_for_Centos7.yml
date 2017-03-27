@@ -1,0 +1,35 @@
+---
+- name: install mysql etc(centos7)
+  yum: name={{ item }} state=installed
+  with_items:
+   - mariadb-server
+   - MySQL-python
+  ignore_errors: yes  
+
+- name: insert firewalld rule
+  firewalld: port={{ mysql_port }}/tcp permanent=true state=enabled immediate=yes
+
+- name: configure selinux to mysql on  any mysql_port
+  seboolean: name={{ item }} state=true persistent=yes
+  with_items:
+     - mysql_connect_any
+     - allow_user_mysql_connect
+     - httpd_can_network_connect_db
+  ignore_errors: yes
+
+#- name: creat mysql configuration file
+#  template: src=my.cnf.j2 dest=/etc/my.cnf
+
+- name: Start MariaDB Service
+  service: name=mariadb state=started enabled=yes
+  ignore_errors: yes
+
+- name: create mysql user
+  mysql_user: name={{ dbuser }} host={{ item }} password={{ dbpassword }} priv="*.*:ALL,GRANT" state=present  
+  with_items:
+   - "%"
+   - localhost
+
+- name: create database
+  mysql_db: login_user={{ dbuser }} login_password={{ dbpassword }} name="testtest" state=present
+ 

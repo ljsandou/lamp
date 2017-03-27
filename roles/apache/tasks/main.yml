@@ -1,33 +1,8 @@
 ---
-- name: install apache 
-  yum: name=httpd state=present 
-  ignore_errors: yes
-
-#- name: copy apache template
-#  template: src=default.conf dest=/etc/nginx/conf.d/default.conf 
-
-- name: config apache to excute php
-  lineinfile: dest=/etc/httpd/conf/httpd.conf state=present create=yes regexp="^AddType"  insertafter="^AddType application/x-gzip .gz .tgz" 
-              line="AddType application/x-httpd-php .php"
-  notify: restart apache
+- name: install for Centos6
+  include: apache_for_Centos6.yml
   when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
 
-- name: start firewalld
-  service: name=firewalld state=started enabled=yes
+- name: install for Centos7
+  include: apache_for_Centos7.yml
   when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
-
-- name: add rule to iptables
-  lineinfile: dest=/etc/sysconfig/iptables create=yes state=present regexp="{{ apache_port }}" insertafter="^:OUTPUT "
-              line="-A INPUT -p tcp  --dport {{ apache_port }} -j  ACCEPT"
-  notify: restart iptables
-  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
-
-
-- name: instert firewalld rule for apache
-  firewalld: port={{ apache_port }}/tcp  permanent=true state=enabled immediate=yes
-  ignore_errors: yes  
-  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
-
-- name: start apache and permanent
-  service: name=httpd state=restarted enabled=yes
-  ignore_errors: yes

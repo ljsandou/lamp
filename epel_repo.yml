@@ -1,9 +1,10 @@
 ---
-- hosts: home
+- name: some basic setting
+  hosts: company
   remote_user: root
   become: yes
   become_method: sudo
-  
+
   tasks:
   - name: deliver ssh key
     authorized_key: 
